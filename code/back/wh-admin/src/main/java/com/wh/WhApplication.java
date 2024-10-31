@@ -47,5 +47,6 @@ public class WhApplication
             }
             SpringApplication.run(WhApplication.class, args);
         }
+        System.out.println("123123123");
     }
 }
