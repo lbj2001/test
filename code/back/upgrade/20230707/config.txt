@@ -1,0 +1,6 @@
+1、新增多minio服务器地址配置
+minio:
+  url: 线上生产地址
+  accessKey: 线上用户名
+  secretKey: 线上密码
+  bucketName: 存储桶号

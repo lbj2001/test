@@ -1,0 +1,21 @@
+nacos:
+  config:
+    server-addr: ${NACOS_ADDR} # nacos服务地址
+    username: ${NACOS_USERNAME} # nacos用户名
+    password: ${NACOS_PASSWORD} # nacos密码
+    namespace: ${spring.profiles.active} # nacos命名空间id
+    group: ${server.port} # nacos分组
+    data-id: application-${spring.profiles.active}.yml # nacos配置文件ids，多个用,隔开
+    log-data-id: logback-${spring.profiles.active}.xml # nacos日志配置文件id，必须以.xml结尾
+    auto-refresh: true
+    bootstrap:
+      enable: true
+      log-enable: true
+    type: yaml
+
+  discovery:
+    server-addr: ${NACOS_ADDR} # nacos服务地址
+    username: ${NACOS_USERNAME} # nacos用户名
+    password: ${NACOS_PASSWORD} # nacos密码
+    namespace: ${spring.profiles.active} # nacos命名空间id
+    auto-register: true

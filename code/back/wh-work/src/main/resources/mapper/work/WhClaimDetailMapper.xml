@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhClaimDetailMapper">
+    
+    <resultMap type="WhClaimDetail" id="WhClaimDetailResult">
+        <result property="id"    column="id"    />
+        <result property="taskId"    column="task_id"    />
+        <result property="claimType"    column="claim_type"    />
+        <result property="workingHours"    column="working_hours"    />
+        <result property="description"    column="description"    />
+        <result property="totalHours"    column="total_hours"    />
+        <result property="lockTime"    column="lock_time"    />
+        <result property="lockStatus"    column="lock_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectWhClaimDetailVo">
+        select id, task_id, claim_type, working_hours, description, total_hours, lock_time, lock_status, create_by, create_time, update_by, update_time from wh_claim_detail
+    </sql>
+
+    <select id="selectWhClaimDetailList" parameterType="WhClaimDetail" resultMap="WhClaimDetailResult">
+        <include refid="selectWhClaimDetailVo"/>
+        <where>  
+            <if test="taskId != null "> and task_id = #{taskId}</if>
+            <if test="claimType != null "> and claim_type = #{claimType}</if>
+            <if test="workingHours != null "> and working_hours = #{workingHours}</if>
+        </where>
+    </select>
+    
+    <select id="selectWhClaimDetailById" parameterType="Long" resultMap="WhClaimDetailResult">
+        <include refid="selectWhClaimDetailVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhClaimDetail" parameterType="WhClaimDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_claim_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskId != null">task_id,</if>
+            <if test="claimType != null">claim_type,</if>
+            <if test="workingHours != null">working_hours,</if>
+            <if test="description != null">description,</if>
+            <if test="totalHours != null">total_hours,</if>
+            <if test="lockTime != null">lock_time,</if>
+            <if test="lockStatus != null">lock_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskId != null">#{taskId},</if>
+            <if test="claimType != null">#{claimType},</if>
+            <if test="workingHours != null">#{workingHours},</if>
+            <if test="description != null">#{description},</if>
+            <if test="totalHours != null">#{totalHours},</if>
+            <if test="lockTime != null">#{lockTime},</if>
+            <if test="lockStatus != null">#{lockStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhClaimDetail" parameterType="WhClaimDetail">
+        update wh_claim_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="claimType != null">claim_type = #{claimType},</if>
+            <if test="workingHours != null">working_hours = #{workingHours},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="totalHours != null">total_hours = #{totalHours},</if>
+            <if test="lockTime != null">lock_time = #{lockTime},</if>
+            <if test="lockStatus != null">lock_status = #{lockStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhClaimDetailById" parameterType="Long">
+        delete from wh_claim_detail where id = #{id}
+    </delete>
+
+    <delete id="deleteWhClaimDetailByIds" parameterType="String">
+        delete from wh_claim_detail where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

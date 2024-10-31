@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhTaskMapper">
+    
+    <resultMap type="WhTask" id="WhTaskResult">
+        <result property="id"    column="id"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="taskNo"    column="task_no"    />
+        <result property="taskName"    column="task_name"    />
+        <result property="appName"    column="app_name"    />
+        <result property="distributionTime"    column="distribution_time"    />
+        <result property="staffId"    column="staff_id"    />
+        <result property="description"    column="description"    />
+        <result property="linkUrl"    column="link_url"    />
+        <result property="qrCode"    column="qr_code"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="spendTime"    column="spend_time"    />
+        <result property="workingHours"    column="working_hours"    />
+        <result property="paidHours"    column="paid_hours"    />
+        <result property="month"    column="month"    />
+        <result property="tagNo"    column="tag_no"    />
+        <result property="branchName"    column="branch_name"    />
+        <result property="innerBranch"    column="inner_branch"    />
+        <result property="releaseFlag"    column="release_flag"    />
+        <result property="releaseTag"    column="release_tag"    />
+        <result property="releaseAttachment"    column="release_attachment"    />
+        <result property="deployUrl"    column="deploy_url"    />
+        <result property="fileUrl"    column="file_url"    />
+        <result property="uploadStatus"    column="upload_status"    />
+        <result property="completeInstructions"    column="complete_instructions"    />
+        <result property="stage"    column="stage"    />
+        <result property="status"    column="status"    />
+        <result property="cycleType"    column="cycle_type"    />
+        <result property="distributeStatus"    column="distribute_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="staffNo"    column="staff_no"    />
+        <result property="staffName"    column="staff_name"    />
+        <result property="participationMethods"    column="participation_methods"    />
+        <result property="subPaidHours"    column="subPaidHours"    />
+        <result property="humanCompanyRelation"    column="human_company_relation"    />
+        <result property="configStatus"    column="config_status"    />
+        <result property="mainProjectName"    column="main_project_name"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectSource"    column="project_source"    />
+        <result property="projectType"    column="project_type"    />
+    </resultMap>
+
+    <sql id="selectWhTaskVo">
+        select id, parent_id, project_id, task_no, task_name, app_name, distribution_time, staff_id, staff_no, participation_methods, description, link_url, qr_code, submit_time,
+               spend_time, working_hours, paid_hours, month, tag_no, branch_name, inner_branch, release_flag, release_tag, release_attachment, deploy_url, upload_status, complete_instructions,
+               stage, status, cycle_type, create_by, create_time, update_by, update_time, del_flag
+        from wh_task
+    </sql>
+
+    <select id="selectWhTaskList" parameterType="WhTask" resultMap="WhTaskResult">
+        select T1.*, T2.staff_name, T3.nick_name as createByName, T5.project_name, T5.project_source
+        <if test="salaryStaffName !=null and salaryStaffName != ''">
+            , T4.working_hours as subPaidHours
+        </if>
+        from wh_task T1
+        left join wh_staff T2 on T1.staff_id = T2.id
+        left join sys_user T3 on T1.create_by = T3.user_name and T3.del_flag = '0'
+        <if test="salaryStaffName !=null and salaryStaffName != ''">
+            inner join wh_task_distribution T4 on T4.task_id = T1.id
+        </if>
+        left join wh_project T5 on T1.project_id = T5.id
+        <where>
+            T1.del_flag = '0'
+            <if test="parentId != null"> and T1.parent_id = #{parentId}</if>
+            <if test="projectId != null"> and T1.project_id = #{projectId}</if>
+            <if test="taskNo != null  and taskNo != ''"> and T1.task_no like concat('%', #{taskNo}, '%')</if>
+            <if test="taskName != null  and taskName != ''"> and T1.task_name like concat('%', #{taskName}, '%')</if>
+            <if test="appName != null  and appName != ''"> and T1.app_name like concat('%', #{appName}, '%')</if>
+            <if test="distributionTime != null "> and T1.distribution_time = #{distributionTime}</if>
+            <if test="participationMethods != null"> and T1.participation_methods = #{participationMethods}</if>
+            <if test="month != null"> and T1.month = #{month}</if>
+            <if test="distributeMonth !=null"> and DATE_FORMAT(T1.distribution_time, '%Y-%m') = #{distributeMonth} </if>
+            <if test="status != null"> and T1.status = #{status}</if>
+            <if test="staffId != null"> and T1.staff_id = #{staffId}</if>
+            <if test="distributeStatus != null"> and T1.distribute_status = #{distributeStatus}</if>
+            <if test="staffName != null and staffName != ''"> and T2.staff_name like concat('%', #{staffName}, '%' )</if>
+            <if test="createByName != null and createByName != ''"> and T3.nick_name like concat('%', #{createByName}, '%' )</if>
+            <if test="salaryStaffName !=null and salaryStaffName != ''"> and T4.staff_name = #{salaryStaffName} </if>
+            <if test="projectSource != null"> and T5.project_source = #{projectSource}</if>
+        </where>
+    </select>
+
+    <select id="selectTaskByParentId" parameterType="Long" resultMap="WhTaskResult">
+        select * from wh_task where del_flag = '0' and parent_id=#{parentId}
+    </select>
+
+    <select id="selectDevWhTaskList" parameterType="WhTask" resultMap="WhTaskResult">
+        select T1.*, T2.staff_name, T3.nick_name as createByName, T5.task_no as parentTaskNo, T5.participation_methods as createParticipationMethods,
+         T6.human_company_relation, T6.config_status, T7.main_project_name, T7.project_name
+        <if test="salaryStaffName !=null and salaryStaffName != ''">
+            , T4.working_hours as subPaidHours
+        </if>
+        from wh_task T1
+        left join wh_staff T2 on T1.staff_id = T2.id
+        left join sys_user T3 on T1.create_by = T3.user_name and T3.del_flag = '0'
+        <if test="salaryStaffName !=null and salaryStaffName != ''">
+            inner join wh_task_distribution T4 on T4.task_id = T1.id
+        </if>
+        left join wh_task T5 on T1.parent_id = T5.id
+        left join sys_user T6 on T2.staff_no = T6.user_name and T6.del_flag = '0'
+        left join wh_project T7 on T1.project_id = T7.id
+        <where>
+            T1.del_flag = '0'
+            and T1.distribute_status = 1
+            and (T1.parent_id = 0 || T5.stage = 4)
+            <if test="parentId != null"> and T1.parent_id = #{parentId}</if>
+            <if test="mainProjectName != null  and mainProjectName != ''"> and T7.main_project_name like concat('%', #{mainProjectName}, '%')</if>
+            <if test="projectId != null"> and T1.project_id = #{projectId}</if>
+            <if test="projectType != null"> and T1.project_type = #{projectType}</if>
+            <if test="taskNo != null  and taskNo != ''"> and T1.task_no like concat('%', #{taskNo}, '%')</if>
+            <if test="taskName != null  and taskName != ''"> and T1.task_name like concat('%', #{taskName}, '%')</if>
+            <if test="appName != null  and appName != ''"> and T1.app_name like concat('%', #{appName}, '%')</if>
+            <if test="distributionTime != null "> and T1.distribution_time = #{distributionTime}</if>
+            <if test="participationMethods != null"> and T1.participation_methods = #{participationMethods}</if>
+            <if test="month != null"> and T1.month = #{month}</if>
+            <if test="distributeMonth !=null"> and DATE_FORMAT(T1.distribution_time, '%Y-%m') = #{distributeMonth} </if>
+            <if test="status != null"> and T1.status = #{status}</if>
+            <if test="createBy != null and createBy != ''"> and T1.create_by = #{createBy} </if>
+            <if test="createByName != null and createByName != ''"> and T3.nick_name like concat('%', #{createByName}, '%' )</if>
+            <if test="staffNoQuery != null and staffNoQuery != ''"> and T2.staff_no like concat('%', #{staffNoQuery}, '%' )</if>
+            <if test="salaryStaffName !=null and salaryStaffName != ''"> and T4.staff_name = #{salaryStaffName} </if>
+            <if test="staffFlag != null and staffFlag == 0 and staffId != null">
+                and T1.staff_id = #{staffId}
+            </if>
+            <if test="staffFlag != null and staffFlag == 1">
+                and (T1.staff_no = #{staffNo} or T1.create_by = #{createBy}
+                <if test="staffNos!=null and staffNos.size > 0">
+                    or T1.staff_no in
+                    <foreach collection="staffNos" item="item" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                </if>)
+            </if>
+            <if test="releaseFlag != null"> and T1.release_flag = #{releaseFlag}</if>
+            <if test="branchName != null"> and T1.branch_name = #{branchName}</if>
+        </where>
+        <if test="columnOrder != null and columnOrder == 0">
+            order by ISNULL(T1.submit_time) desc, T1.submit_time desc, T1.distribution_time desc
+        </if>
+    </select>
+
+    <select id="selectSingleList" parameterType="WhTask" resultMap="WhTaskResult">
+        with recursive tb (id, parent_id, project_id, project_type, task_no, task_name, app_name, distribution_time, staff_id, staff_no, participation_methods, description, link_url, qr_code,
+            submit_time, spend_time, working_hours, paid_hours, month, tag_no, branch_name, inner_branch, release_flag, release_tag, release_attachment, deploy_url, file_url, upload_status, complete_instructions, stage, status,
+            cycle_type, distribute_status, create_by, create_time, update_by, update_time, del_flag, staff_name, createByName, project_name, project_source) as
+        (
+            select T1.*, T2.staff_name, T3.nick_name as createByName, T4.project_name, T4.project_source from wh_task T1
+            left join wh_staff T2 on T1.staff_id = T2.id
+            left join sys_user T3 on T1.create_by = T3.user_name and T3.del_flag = '0'
+            left join wh_project T4 on T1.project_id = T4.id
+            where T1.del_flag = '0'
+            <if test="staffIds!=null and staffIds.size>0">
+                and T1.staff_id in
+                <foreach collection="staffIds" item="staffId" separator="," open="(" close=")">
+                    #{staffId}
+                </foreach>
+            </if>
+            <if test="id != null">
+                and T1.id = #{id}
+            </if>
+
+            UNION DISTINCT
+
+            select T1.*, T2.staff_name, T3.nick_name as createByName, T4.project_name, T4.project_source from wh_task T1
+            left join wh_staff T2 on T1.staff_id = T2.id
+            left join sys_user T3 on T1.create_by = T3.user_name and T3.del_flag = '0'
+            left join wh_project T4 on T1.project_id = T4.id
+            inner join tb t on T1.parent_id = t.id
+            where T1.del_flag = '0'
+        )
+        select * from tb
+        <where>
+            tb.del_flag = '0'
+            <if test="parentId != null"> and tb.parent_id = #{parentId}</if>
+            <if test="distributeMonth !=null"> and DATE_FORMAT(tb.distribution_time, '%Y-%m') = #{distributeMonth} </if>
+            <if test="projectId != null"> and tb.project_id = #{projectId}</if>
+            <if test="appName != null  and appName != ''"> and tb.app_name like concat('%', #{appName}, '%')</if>
+            <if test="taskNo != null  and taskNo != ''"> and tb.task_no like concat('%', #{taskNo}, '%')</if>
+            <if test="taskName != null  and taskName != ''"> and tb.task_name like concat('%', #{taskName}, '%')</if>
+            <if test="createByName != null and createByName != ''"> and tb.createByName like concat('%', #{createByName}, '%' )</if>
+            <if test="distributionTime != null "> and tb.distribution_time = #{distributionTime}</if>
+            <if test="staffName != null and staffName != ''"> and tb.staff_name = #{staffName}</if>
+            <if test="participationMethods != null"> and tb.participation_methods = #{participationMethods}</if>
+            <if test="month != null"> and tb.month = #{month}</if>
+            <if test="projectSource != null"> and tb.project_source = #{projectSource}</if>
+            <if test="distributeStatus != null"> and tb.distribute_status = #{distributeStatus}</if>
+            <if test="status != null"> and tb.status = #{status}</if>
+        </where>
+    </select>
+
+    <select id="selectAllParents" resultMap="WhTaskResult">
+        with recursive tb (id, staff_id, parent_id, participation_methods) as
+        (
+           select id, staff_id, parent_id, participation_methods
+           from wh_task
+           where id = #{id}
+
+           union all
+
+           select c.id, c.staff_id, c.parent_id, c.participation_methods
+           from wh_task c
+           inner join tb t on c.id = t.parent_id
+           where c.del_flag = '0'
+        )
+        select * from tb;
+    </select>
+    
+    <select id="selectWhTaskById" parameterType="Long" resultMap="WhTaskResult">
+        select T1.*, T3.human_company_relation, T3.config_status, T3.nick_name as staff_name,
+               CONCAT(T4.project_name, '/', T4.project_no) as project_name
+        from wh_task T1
+        left join wh_staff T2 on T1.staff_id = T2.id
+        left join sys_user T3 on T2.staff_no = T3.user_name and T3.del_flag = '0'
+        left join wh_project T4 on T1.project_id = T4.id
+        where T1.id = #{id}
+    </select>
+
+    <select id="selectLastByAppName" parameterType="String" resultMap="WhTaskResult">
+        select T1.*
+        from wh_task T1,
+             (select max(create_time) as maxTime from wh_task where del_flag='0' and app_name = #{appName}) as T2
+        where T1.create_time = T2.maxTime
+    </select>
+        
+    <insert id="insertWhTask" parameterType="WhTask" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_task
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null ">parent_id,</if>
+            <if test="projectId != null ">project_id,</if>
+            <if test="projectType != null ">project_type,</if>
+            <if test="taskNo != null and taskNo != ''">task_no,</if>
+            <if test="taskName != null and taskName != ''">task_name,</if>
+            <if test="appName != null and appName != ''">app_name,</if>
+            <if test="distributionTime != null">distribution_time,</if>
+            <if test="staffId != null">staff_id,</if>
+            <if test="staffNo != null">staff_no,</if>
+            <if test="participationMethods != null">participation_methods,</if>
+            <if test="description != null">description,</if>
+            <if test="branchName != null">branch_name,</if>
+            <if test="innerBranch != null">inner_branch,</if>
+            <if test="releaseFlag != null">release_flag,</if>
+            <if test="releaseTag != null">release_tag,</if>
+            <if test="releaseAttachment != null">release_attachment,</if>
+            <if test="linkUrl != null">link_url,</if>
+            <if test="qrCode != null">qr_code,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="spendTime != null">spend_time,</if>
+            <if test="workingHours != null">working_hours,</if>
+            <if test="paidHours != null">paid_hours,</if>
+            <if test="month != null">month,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="stage != null">stage,</if>
+            <if test="status != null">status,</if>
+            <if test="cycleType != null">cycle_type,</if>
+            <if test="distributeStatus != null">distribute_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">#{parentId},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="projectType != null">#{projectType},</if>
+            <if test="taskNo != null and taskNo != ''">#{taskNo},</if>
+            <if test="taskName != null and taskName != ''">#{taskName},</if>
+            <if test="appName != null and appName != ''">#{appName},</if>
+            <if test="distributionTime != null">#{distributionTime},</if>
+            <if test="staffId != null">#{staffId},</if>
+            <if test="staffNo != null">#{staffNo},</if>
+            <if test="participationMethods != null">#{participationMethods},</if>
+            <if test="description != null">#{description},</if>
+            <if test="branchName != null">#{branchName},</if>
+            <if test="innerBranch != null">#{innerBranch},</if>
+            <if test="releaseFlag != null">#{releaseFlag},</if>
+            <if test="releaseTag != null">#{releaseTag},</if>
+            <if test="releaseAttachment != null">#{releaseAttachment},</if>
+            <if test="linkUrl != null">#{linkUrl},</if>
+            <if test="qrCode != null">#{qrCode},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="spendTime != null">#{spendTime},</if>
+            <if test="workingHours != null">#{workingHours},</if>
+            <if test="paidHours != null">#{paidHours},</if>
+            <if test="month != null">#{month},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="stage != null">#{stage},</if>
+            <if test="status != null">#{status},</if>
+            <if test="cycleType != null">#{cycleType},</if>
+            <if test="distributeStatus != null">#{distributeStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhTask" parameterType="WhTask">
+        update wh_task
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="projectType != null">project_type = #{projectType},</if>
+            <if test="taskNo != null and taskNo != ''">task_no = #{taskNo},</if>
+            <if test="taskName != null and taskName != ''">task_name = #{taskName},</if>
+            <if test="appName != null and appName != ''">app_name = #{appName},</if>
+            <if test="distributionTime != null">distribution_time = #{distributionTime},</if>
+            <if test="staffId != null">staff_id = #{staffId},</if>
+            <if test="staffNo != null">staff_no = #{staffNo},</if>
+            <if test="participationMethods != null">participation_methods = #{participationMethods},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="linkUrl != null">link_url = #{linkUrl},</if>
+            <if test="qrCode != null">qr_code = #{qrCode},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="spendTime != null">spend_time = #{spendTime},</if>
+            <if test="workingHours != null">working_hours = #{workingHours},</if>
+            <if test="paidHours != null">paid_hours = #{paidHours},</if>
+            <if test="month != null">month = #{month},</if>
+            <if test="tagNo != null">tag_no = #{tagNo},</if>
+            <if test="branchName != null">branch_name = #{branchName},</if>
+            <if test="innerBranch != null">inner_branch = #{innerBranch},</if>
+            <if test="releaseFlag != null">release_flag = #{releaseFlag},</if>
+            <if test="releaseTag != null">release_tag = #{releaseTag},</if>
+            <if test="releaseAttachment != null">release_attachment = #{releaseAttachment},</if>
+            <if test="deployUrl != null">deploy_url = #{deployUrl},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="uploadStatus != null">upload_status = #{uploadStatus},</if>
+            <if test="completeInstructions != null">complete_instructions = #{completeInstructions},</if>
+            <if test="stage != null">stage = #{stage},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="cycleType != null">cycle_type = #{cycleType},</if>
+            <if test="distributeStatus != null">distribute_status = #{distributeStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="selectAppNames"  resultMap="WhTaskResult">
+        select DISTINCT app_name from wh_task where del_flag = '0'
+    </select>
+
+    <select id="selectAllTags"  resultMap="WhTaskResult">
+        select DISTINCT tag_no
+        from wh_task
+        where del_flag = '0'
+          and release_flag = 0
+          and tag_no is not null
+          and tag_no != '空'
+          and branch_name = #{branchName}
+          and staff_id = #{staffId}
+    </select>
+
+    <select id="selectProjectNames"  resultType="WhProject">
+        select DISTINCT T1.project_id as id, T2.project_name as projectName
+        from wh_task T1
+        left join wh_project T2 on T1.project_id = T2.id
+        where T1.del_flag = '0' and T1.staff_no= #{staffNo}
+    </select>
+
+    <select id="selectStaffNames"  resultMap="WhTaskResult">
+        select DISTINCT T2.staff_no, T2.staff_name, T3.status
+        from wh_task T1
+        left join wh_staff T2 on T1.staff_id = T2.id
+        left join sys_user T3 on T2.staff_no = T3.user_name and T3.del_flag = 0
+        where T1.del_flag = '0'
+          and T2.staff_name is not NULL
+          and T3.status = '0'
+        <if test="staffNos!=null and staffNos.size > 0">
+            and T1.staff_no in
+            <foreach collection="staffNos" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        order by T3.status
+    </select>
+
+    <select id="selectDistributeNames"  resultMap="WhTaskResult">
+        select DISTINCT T2.nick_name as createByName
+        from wh_task T1
+        left join sys_user T2 on T1.create_by = T2.user_name and T2.del_flag = '0'
+        where T1.del_flag = '0'
+          and T2.nick_name is not NULL
+          and T2.status = '0'
+    </select>
+
+    <delete id="deleteWhTaskById" parameterType="Long">
+        update wh_task set del_flag = '1' where id = #{id}
+    </delete>
+
+    <delete id="deleteWhTaskByIds" parameterType="String">
+        update wh_task set del_flag = '1' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="countByStaffId" parameterType="Long" resultType="Integer">
+        select count(1)
+        from wh_task
+        where del_flag = '0'
+        and status = 0
+        and staff_id = #{staffId}
+    </select>
+
+    <select id="countByStage" parameterType="Long" resultType="Integer">
+        select count(1)
+        from wh_task
+        where del_flag = '0'
+          and stage = 2
+          and staff_id = #{staffId}
+    </select>
+
+    <select id="selectCycleTaskList" resultMap="WhTaskResult">
+        select T1.*
+        from wh_task T1
+        where T1.del_flag = '0'
+        and T1.parent_id = 0
+        and T1.status = 1
+        and T1.cycle_type = 3
+        and T1.distribute_status = 1
+        and DATE_FORMAT(T1.distribution_time, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m')
+    </select>
+
+    <select id="selectLatestTask" resultMap="WhTaskResult">
+        select * from wh_task
+        where del_flag = 0
+          and status = 1
+        <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
+        <if test="branchName != null">
+            and branch_name = #{branchName}
+        </if>
+        order by submit_time desc limit 1
+    </select>
+
+    <select id="selectBranchTask" resultMap="WhTaskResult">
+        select * from wh_task
+        where del_flag = 0
+        and status = 0
+        and distribute_status != 0
+        and participation_methods = 3
+        <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
+        <if test="branchName != null">
+            and branch_name = #{branchName}
+        </if>
+        <if test="staffId != null">
+            and staff_id = #{staffId}
+        </if>
+    </select>
+
+    <select id="selectIncompleteList" parameterType="WhTask" resultMap="WhTaskResult">
+        select *
+        from wh_task
+        where del_flag = '0'
+            and staff_id = #{staffId}
+          <if test="status != null">
+            and status = #{status}
+          </if>
+          <if test="stage != null">
+            and stage = #{stage}
+          </if>
+          <if test="distributeStatus != null">
+            and distribute_status = #{distributeStatus}
+          </if>
+          <if test="projectId != null">
+            and project_id = #{projectId}
+          </if>
+          <if test="id != null">
+            and id &lt;&gt; #{id}
+          </if>
+
+    </select>
+
+</mapper>

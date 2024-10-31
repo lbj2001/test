@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhProjectOriginMapper">
+    
+    <resultMap type="WhProjectOrigin" id="WhProjectOriginResult">
+        <result property="id"    column="id"    />
+        <result property="projectNo"    column="project_no"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="summaryNo"    column="summary_no"    />
+        <result property="codeSourceNo"    column="code_source_no"    />
+        <result property="syncId"    column="sync_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectWhProjectOriginVo">
+        select id, project_no, project_name, summary_no, code_source_no, sync_id, create_by, create_time, update_by, update_time, del_flag from wh_project_origin
+    </sql>
+
+    <select id="selectWhProjectOriginList" parameterType="WhProjectOrigin" resultMap="WhProjectOriginResult">
+        <include refid="selectWhProjectOriginVo"/>
+        <where>
+            del_flag = 0
+            <if test="projectNo != null  and projectNo != ''"> and project_no = #{projectNo}</if>
+            <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="summaryNo != null  and summaryNo != ''"> and summary_no = #{summaryNo}</if>
+            <if test="codeSourceNo != null  and codeSourceNo != ''"> and code_source_no = #{codeSourceNo}</if>
+        </where>
+    </select>
+    
+    <select id="selectWhProjectOriginById" parameterType="Long" resultMap="WhProjectOriginResult">
+        <include refid="selectWhProjectOriginVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhProjectOrigin" parameterType="WhProjectOrigin" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_project_origin
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectNo != null and projectNo != ''">project_no,</if>
+            <if test="projectName != null">project_name,</if>
+            <if test="summaryNo != null">summary_no,</if>
+            <if test="codeSourceNo != null">code_source_no,</if>
+            <if test="syncId != null">sync_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectNo != null and projectNo != ''">#{projectNo},</if>
+            <if test="projectName != null">#{projectName},</if>
+            <if test="summaryNo != null">#{summaryNo},</if>
+            <if test="codeSourceNo != null">#{codeSourceNo},</if>
+            <if test="syncId != null">#{syncId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhProjectOrigin" parameterType="WhProjectOrigin">
+        update wh_project_origin
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectNo != null and projectNo != ''">project_no = #{projectNo},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="summaryNo != null">summary_no = #{summaryNo},</if>
+            <if test="codeSourceNo != null">code_source_no = #{codeSourceNo},</if>
+            <if test="syncId != null">sync_id = #{syncId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhProjectOriginById" parameterType="Long">
+        delete from wh_project_origin where id = #{id}
+    </delete>
+
+    <delete id="deleteWhProjectOriginByIds" parameterType="String">
+        delete from wh_project_origin where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateProjectOriginByNo" parameterType="WhProjectOrigin">
+        update wh_project_origin
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="syncId != null">sync_id = #{syncId},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where project_no = #{projectNo}
+        and summary_no = #{summaryNo}
+        and code_source_no = #{codeSourceNo}
+    </update>
+
+    <select id="selectWhProjectOriginBySyncId" parameterType="Long" resultMap="WhProjectOriginResult">
+        <include refid="selectWhProjectOriginVo"/>
+        where sync_id = #{syncId} limit 1
+    </select>
+</mapper>

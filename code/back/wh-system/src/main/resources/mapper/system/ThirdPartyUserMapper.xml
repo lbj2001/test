@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.system.mapper.ThirdPartyUserMapper">
+
+	<resultMap type="ThirdPartyUserVo" id="ThirdPartyUserResult">
+		<result property="id"     column="id"      />
+		<result property="statDate"     column="stat_date"      />
+		<result property="ryh"     column="ryh"      />
+		<result property="xm"     column="xm"      />
+		<result property="khyhzh"     column="khyhzh"      />
+		<result property="khzh"     column="khzh"      />
+		<result property="rsgx"     column="rsgx"      />
+		<result property="sj"     column="sj"      />
+		<result property="isDelete"     column="is_delete"      />
+		<result property="dataType"     column="data_type"      />
+		<result property="etlTime"     column="etl_time"      />
+	</resultMap>
+
+  <!--DATE_FORMAT(SYSDATE(),'%Y-%m-%d')-->
+	<sql id="selectUserVo">
+		select id, stat_date, ryh, xm, khyhzh, khzh, rsgx, sj, is_delete, data_type, etl_time from ads_gssb_emp_base_info_d
+	</sql>
+
+
+	
+	<select id="selectLogStatus" resultType="Integer">
+	    select count(1)
+		from ads_task_complete_status_log
+		where exec_date = #{execDate}
+			and table_name = 'ads.ads_gssb_emp_base_info_d'
+			and task_status = 1
+	</select>
+
+	<select id="selectUserList" resultMap="ThirdPartyUserResult">
+		<include refid="selectUserVo"/>
+		where stat_date = #{statDate}
+	</select>
+
+</mapper> 

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhTaskStatisticsMapper">
+    
+    <resultMap type="WhTaskStatistics" id="WhTaskStatisticsResult">
+        <result property="id"    column="id"    />
+        <result property="staffId"    column="staff_id"    />
+        <result property="totalWorkingHours"    column="total_working_hours"    />
+        <result property="amount"    column="amount"    />
+        <result property="month"    column="month"    />
+        <result property="dimension"    column="dimension"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectWhTaskStatisticsVo">
+        select id, staff_id, total_working_hours, amount, month, dimension, create_by, create_time, update_by, update_time from wh_task_statistics
+    </sql>
+
+    <select id="selectWhTaskStatisticsList" parameterType="WhTaskStatistics" resultMap="WhTaskStatisticsResult">
+        select T1.*,T2.staff_no as staffNo,T2.staff_name as staffName
+        from wh_task_statistics T1
+        left join wh_staff T2 on T1.staff_id = T2.id
+        <where>  
+            <if test="staffId != null "> and staff_id = #{staffId}</if>
+            <if test="staffName != null  and staffName != ''"> and T2.staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="totalWorkingHours != null "> and total_working_hours = #{totalWorkingHours}</if>
+            <if test="month != null  and month != ''"> and month = #{month}</if>
+            <if test="dimension != null "> and dimension = #{dimension}</if>
+            <if test="year != null">
+                and SUBSTR(T1.month,1,4) = #{year}
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectWhTaskStatisticsById" parameterType="Long" resultMap="WhTaskStatisticsResult">
+        <include refid="selectWhTaskStatisticsVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhTaskStatistics" parameterType="WhTaskStatistics" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_task_statistics
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="staffId != null">staff_id,</if>
+            <if test="totalWorkingHours != null">total_working_hours,</if>
+            <if test="amount != null">amount,</if>
+            <if test="month != null">month,</if>
+            <if test="dimension != null">dimension,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="staffId != null">#{staffId},</if>
+            <if test="totalWorkingHours != null">#{totalWorkingHours},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="month != null">#{month},</if>
+            <if test="dimension != null">#{dimension},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhTaskStatistics" parameterType="WhTaskStatistics">
+        update wh_task_statistics
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="staffId != null">staff_id = #{staffId},</if>
+            <if test="totalWorkingHours != null">total_working_hours = #{totalWorkingHours},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="month != null">month = #{month},</if>
+            <if test="dimension != null">dimension = #{dimension},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhTaskStatisticsById" parameterType="Long">
+        delete from wh_task_statistics where id = #{id}
+    </delete>
+
+    <delete id="deleteWhTaskStatisticsByIds" parameterType="String">
+        delete from wh_task_statistics where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByStaffId" resultMap="WhTaskStatisticsResult">
+        <include refid="selectWhTaskStatisticsVo"/>
+        where staff_id = #{staffId} and month = #{month}
+    </select>
+</mapper>

@@ -1,0 +1,11 @@
+1、新增多数据源配置, 生产库配置从库的线上地址，对应application-dev.yml,
+  配置项spring:
+       datasource:
+         druid:
+           # 从库数据源
+           slave:
+           # 从数据源开关/默认关闭
+               enabled: true
+               url: 生产库地址
+               username: 生产库用户名
+               password: 生产库密码

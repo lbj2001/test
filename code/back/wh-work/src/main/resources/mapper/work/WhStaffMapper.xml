@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhStaffMapper">
+    
+    <resultMap type="WhStaff" id="WhStaffResult">
+        <result property="id"    column="id"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="teamName"    column="team_name"    />
+        <result property="teamNo"    column="team_no"    />
+        <result property="staffNo"    column="staff_no"    />
+        <result property="staffName"    column="staff_name"    />
+        <result property="firstCooperationTime"    column="first_cooperation_time"    />
+        <result property="participationMethods"    column="participation_methods"    />
+        <result property="endCooperationTime"    column="end_cooperation_time"    />
+        <result property="parallelFlag"    column="parallel_flag"    />
+        <result property="workContent"    column="work_content"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="updateByName"    column="nick_name"    />
+    </resultMap>
+
+    <sql id="selectWhStaffVo">
+        select id, parent_id, team_id, team_name, team_no, staff_no, staff_name, participation_methods, parallel_flag, work_content,
+               create_by, create_time, update_by, update_time, del_flag from wh_staff
+    </sql>
+
+    <select id="selectWhStaffList" parameterType="WhStaff" resultMap="WhStaffResult">
+        select T1.*, T2.first_cooperation_time, T2.end_cooperation_time, T3.nick_name
+        from wh_staff T1
+        left join sys_user T2 on T1.staff_no = T2.user_name and T2.del_flag = '0'
+        left join sys_user T3 on T1.update_by = T3.user_name and T3.del_flag = '0'
+        <where>
+            <if test="delFlag != null"> and T1.del_flag = #{delFlag}</if>
+            <if test="parentId != null"> and T1.parent_id = #{parentId}</if>
+            <if test="teamId != null"> and T1.team_id = #{teamId}</if>
+            <if test="teamName != null"> and T1.team_name = #{teamName}</if>
+            <if test="teamNo != null  and teamNo != ''"> and T1.team_no like concat('%', #{teamNo}, '%')</if>
+            <if test="staffNo != null  and staffNo != ''"> and T1.staff_no like concat('%', #{staffNo}, '%')</if>
+            <if test="staffName != null  and staffName != ''"> and T1.staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="participationMethods != null "> and T1.participation_methods = #{participationMethods}</if>
+            <if test="parallelFlag != null "> and T1.parallel_flag = #{parallelFlag}</if>
+            <if test="maxMethod != null "> and T1.participation_methods &lt; #{maxMethod}</if>
+            <if test="pageMethods != null "> and T1.participation_methods = #{pageMethods}</if>
+            <if test="status != null "> and T2.status = #{status}</if>
+        </where>
+    </select>
+
+    <select id="selectAllRelatives" parameterType="WhStaff" resultMap="WhStaffResult">
+        select * from (with recursive tb (id, team_name, team_no, staff_no, staff_name, parent_id, team_id, participation_methods, first_cooperation_time, end_cooperation_time, create_time) as
+          (
+              select T1.id, T1.team_name, T1.team_no, T1.staff_no, T1.staff_name, T1.parent_id, T1.team_id, T1.participation_methods, T2.first_cooperation_time, T2.end_cooperation_time, T1.create_time
+              from wh_staff T1
+              left join sys_user T2 on T1.staff_no = T2.user_name and T2.del_flag = '0'
+              where T1.id = #{id}
+
+              union all
+
+              select c.id, c.team_name, c.team_no, c.staff_no, c.staff_name, c.parent_id, c.team_id, c.participation_methods, su.first_cooperation_time, su.end_cooperation_time, c.create_time
+              from wh_staff c
+              left join sys_user su on c.staff_no = su.user_name and su.del_flag = '0'
+              inner join tb t on c.parent_id = t.id
+              where c.del_flag = '0'
+          )
+        select * from tb) as T1
+        <where>
+            <if test="teamName != null"> and T1.team_name = #{teamName}</if>
+            <if test="teamNo != null  and teamNo != ''"> and T1.team_no like concat('%', #{teamNo}, '%')</if>
+            <if test="staffNo != null  and staffNo != ''"> and T1.staff_no like concat('%', #{staffNo}, '%')</if>
+            <if test="staffName != null  and staffName != ''"> and T1.staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="participationMethods != null "> and T1.participation_methods = #{participationMethods}</if>
+            <if test="maxMethod != null "> and T1.participation_methods &lt; #{maxMethod}</if>
+            <if test="pageMethods != null "> and T1.participation_methods = #{pageMethods}</if>
+        </where>
+
+        union
+
+        select * from (with recursive tb (id, team_name, team_no, staff_no, staff_name, parent_id, team_id, participation_methods, first_cooperation_time, end_cooperation_time, create_time) as
+          (
+              select T1.id, T1.team_name, T1.team_no, T1.staff_no, T1.staff_name, T1.parent_id, T1.team_id, T1.participation_methods, T2.first_cooperation_time, T2.end_cooperation_time, T1.create_time
+              from wh_staff T1
+              left join sys_user T2 on T1.staff_no = T2.user_name and T2.del_flag = '0'
+              where id = #{id}
+
+              union all
+
+              select c.id, c.team_name, c.team_no, c.staff_no, c.staff_name, c.parent_id, c.team_id, c.participation_methods, su.first_cooperation_time, su.end_cooperation_time, c.create_time
+              from wh_staff c
+              left join sys_user su on c.staff_no = su.user_name and su.del_flag = '0'
+              inner join tb t on c.id = t.parent_id
+              where c.del_flag = '0'
+          )
+       select * from tb) as T2
+        <where>
+            <if test="teamName != null"> and T2.team_name = #{teamName}</if>
+            <if test="teamNo != null  and teamNo != ''"> and T2.team_no like concat('%', #{teamNo}, '%')</if>
+            <if test="staffNo != null  and staffNo != ''"> and T2.staff_no like concat('%', #{staffNo}, '%')</if>
+            <if test="staffName != null  and staffName != ''"> and T2.staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="participationMethods != null "> and T2.participation_methods = #{participationMethods}</if>
+            <if test="maxMethod != null "> and T2.participation_methods &lt; #{maxMethod}</if>
+            <if test="pageMethods != null "> and T2.participation_methods = #{pageMethods}</if>
+        </where>
+    </select>
+
+    <select id="selectWhStaffListChildren" parameterType="WhStaff" resultMap="WhStaffResult">
+        with recursive tb (id, team_name, team_no, staff_no, staff_name, parent_id, participation_methods, parallel_flag, work_content, create_time, update_time, del_flag, first_cooperation_time, end_cooperation_time, nick_name) as
+        (
+            select T1.id, T1.team_name, T1.team_no, T1.staff_no, T1.staff_name, T1.parent_id, T1.participation_methods, T1.parallel_flag, T1.work_content, T1.create_time, T1.update_time, T1.del_flag, T2.first_cooperation_time, T2.end_cooperation_time, T3.nick_name
+            from wh_staff T1
+            left join sys_user T2 on T1.staff_no = T2.user_name and T2.del_flag = '0'
+            left join sys_user T3 on T1.update_by = T3.user_name and T3.del_flag = '0'
+            where T1.id = #{id}
+
+            union all
+
+            select c.id, c.team_name, c.team_no, c.staff_no, c.staff_name, c.parent_id, c.participation_methods, c.parallel_flag, c.work_content, c.create_time, c.update_time, c.del_flag, su.first_cooperation_time, su.end_cooperation_time, ss.nick_name
+            from wh_staff c
+            left join sys_user su on c.staff_no = su.user_name and su.del_flag = '0'
+            left join sys_user ss on c.update_by = ss.user_name and ss.del_flag = '0'
+            inner join tb t on c.parent_id = t.id
+            <where>
+                <if test="delFlag != null"> and c.del_flag = #{delFlag}</if>
+                <if test="teamNo != null  and teamNo != ''"> and c.team_no like concat('%', #{teamNo}, '%')</if>
+                <if test="staffNo != null  and staffNo != ''"> and c.staff_no like concat('%', #{staffNo}, '%')</if>
+                <if test="staffName != null  and staffName != ''"> and c.staff_name like concat('%', #{staffName}, '%')</if>
+                <if test="participationMethods != null "> and c.participation_methods = #{participationMethods}</if>
+                <if test="parallelFlag != null "> and c.parallel_flag = #{parallelFlag}</if>
+                <if test="maxMethod != null "> and c.participation_methods &lt; #{maxMethod}</if>
+            </where>
+
+        )
+        select * from tb;
+    </select>
+
+    <select id="selectAllChildren" parameterType="WhStaff" resultMap="WhStaffResult">
+        with recursive tb (id, team_name, team_no, staff_no, staff_name, parent_id, participation_methods, parallel_flag, create_time, update_time, del_flag) as
+        (
+        select T1.id, T1.team_name, T1.team_no, T1.staff_no, T1.staff_name, T1.parent_id, T1.participation_methods, T1.parallel_flag, T1.create_time, T1.update_time, T1.del_flag
+        from wh_staff T1
+        where T1.id = #{id}
+
+        union all
+
+        select c.id, c.team_name, c.team_no, c.staff_no, c.staff_name, c.parent_id, c.participation_methods, c.parallel_flag, c.create_time, c.update_time, c.del_flag
+        from wh_staff c
+        inner join tb t on c.parent_id = t.id
+        where c.del_flag = 0
+
+        )
+        select * from tb
+        left join sys_user su on tb.staff_no = su.user_name and su.del_flag = '0'
+        where su.status = 0
+            <if test="participationMethods != null">
+                and tb.participation_methods = #{participationMethods}
+            </if>
+    </select>
+
+    <select id="selectWhStaffListParents" parameterType="WhStaff" resultMap="WhStaffResult">
+        with recursive tb (id, staff_no, staff_name, parent_id, team_id, participation_methods) as
+        (
+        select id, staff_no, staff_name, parent_id, team_id, participation_methods
+        from wh_staff
+        where id = #{id}
+
+        union all
+
+        select c.id, c.staff_no, c.staff_name, c.parent_id, c.team_id, c.participation_methods
+        from wh_staff c
+        inner join tb t on c.id = t.parent_id
+        where c.del_flag = '0'
+        )
+        select * from tb;
+    </select>
+
+    <select id="selectAllParents" parameterType="WhStaff" resultMap="WhStaffResult">
+        with recursive tb (id, team_name, team_no, staff_no, staff_name, parent_id, participation_methods, parallel_flag, work_content, create_time, update_time, del_flag, first_cooperation_time, end_cooperation_time, nick_name) as
+        (
+            select T1.id, T1.team_name, T1.team_no, T1.staff_no, T1.staff_name, T1.parent_id, T1.participation_methods, T1.parallel_flag, T1.work_content, T1.create_time, T1.update_time, T1.del_flag, T2.first_cooperation_time, T2.end_cooperation_time, T3.nick_name
+            from wh_staff T1
+            left join sys_user T2 on T1.staff_no = T2.user_name and T2.del_flag = '0'
+            left join sys_user T3 on T1.update_by = T3.user_name and T3.del_flag = '0'
+            where T1.id = #{id}
+
+            union all
+
+            select c.id, c.team_name, c.team_no, c.staff_no, c.staff_name, c.parent_id, c.participation_methods, c.parallel_flag, c.work_content, c.create_time, c.update_time, c.del_flag, su.first_cooperation_time, su.end_cooperation_time, ss.nick_name
+            from wh_staff c
+            left join sys_user su on c.staff_no = su.user_name and su.del_flag = '0'
+            left join sys_user ss on c.update_by = ss.user_name and ss.del_flag = '0'
+            inner join tb t on c.id = t.parent_id
+        )
+        select * from tb where id &lt;&gt; #{id}
+    </select>
+
+    <select id="selectWhStaffById" parameterType="Long" resultMap="WhStaffResult">
+        <include refid="selectWhStaffVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhStaff" parameterType="WhStaff" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_staff
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null and parentId != 0">parent_id,</if>
+            <if test="teamId != null">team_id,</if>
+            <if test="teamName != null and teamName != ''">team_name,</if>
+            <if test="teamNo != null and teamNo != ''">team_no,</if>
+            <if test="staffNo != null">staff_no,</if>
+            <if test="staffName != null and staffName != ''">staff_name,</if>
+            <if test="participationMethods != null">participation_methods,</if>
+            <if test="parallelFlag != null">parallel_flag,</if>
+            <if test="workContent != null and workContent != '' ">work_content,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="parentId != null and parentId != 0">#{parentId},</if>
+            <if test="teamId != null">#{teamId},</if>
+            <if test="teamName != null and teamName != ''">#{teamName},</if>
+            <if test="teamNo != null and teamNo != ''">#{teamNo},</if>
+            <if test="staffNo != null">#{staffNo},</if>
+            <if test="staffName != null and staffName != ''">#{staffName},</if>
+            <if test="participationMethods != null">#{participationMethods},</if>
+            <if test="parallelFlag != null">#{parallelFlag},</if>
+            <if test="workContent != null and workContent != ''">#{workContent},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhStaff" parameterType="WhStaff">
+        update wh_staff
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null and parentId != 0">parent_id = #{parentId},</if>
+            <if test="teamId != null">team_id = #{teamId},</if>
+            <if test="teamName != null and teamName != ''">team_name = #{teamName},</if>
+            <if test="teamNo != null and teamNo != ''">team_no = #{teamNo},</if>
+            <if test="staffNo != null">staff_no = #{staffNo},</if>
+            <if test="staffName != null and staffName != ''">staff_name = #{staffName},</if>
+            <if test="participationMethods != null">participation_methods = #{participationMethods},</if>
+            <if test="parallelFlag != null">parallel_flag = #{parallelFlag},</if>
+            <if test="workContent != null and workContent != ''">work_content = #{workContent},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhStaffById" parameterType="Long">
+        update wh_staff set del_flag = '1' where id = #{id}
+    </delete>
+
+    <delete id="deleteWhStaffByIds" parameterType="String">
+        update wh_staff set del_flag = '1' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectMaxTeamNo" parameterType="String" resultType="String">
+        select team_no from wh_staff
+        where team_name like concat('%', #{teamName}, '%')
+        order by create_time desc limit 1
+    </select>
+
+    <select id="selectSalaryNames" parameterType="WhStaff" resultMap="WhStaffResult">
+        select *
+        from wh_staff
+        where del_flag = 0
+          and parent_id = (select id from wh_staff T2 where T2.del_flag = 0 and T2.staff_no =#{staffNo} and T2.participation_methods = 3)
+    </select>
+
+    <select id="selectWhStaffListByParent" parameterType="WhStaff" resultMap="WhStaffResult">
+        select T1.*, T2.working_price as workingPrice
+        from wh_staff T1
+        left join sys_user T2 on T1.staff_no = T2.user_name and T2.del_flag = 0
+        <where>
+            T1.del_flag = 0 and T1.parent_id = #{parentId}
+        </where>
+    </select>
+
+    <select id="selectMaxStaff" parameterType="String" resultMap="WhStaffResult">
+        select * from wh_staff where staff_no = #{staffNo} order by participation_methods limit 1
+    </select>
+
+    <select id="selectTeamAmount" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        WITH RECURSIVE cte (id, staff_no) AS (
+            SELECT id, staff_no FROM wh_staff WHERE id = #{staffId}
+            UNION ALL
+            SELECT T1.id, T1.staff_no FROM wh_staff T1 INNER JOIN cte ON cte.id = T1.parent_id
+        )
+        SELECT count(DISTINCT staff_no) FROM cte
+    </select>
+
+</mapper>

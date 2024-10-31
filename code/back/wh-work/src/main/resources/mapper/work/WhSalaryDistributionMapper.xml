@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhSalaryDistributionMapper">
+    
+    <resultMap type="WhSalaryDistribution" id="WhSalaryDistributionResult">
+        <result property="id"    column="id"    />
+        <result property="staffId"    column="staff_id"    />
+        <result property="workingHours"    column="working_hours"    />
+        <result property="salary"    column="salary"    />
+        <result property="month"    column="month"    />
+        <result property="distributeTime"    column="distribute_time"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="staffName"    column="staff_name"    />
+        <result property="staffNo"    column="staff_no"    />
+        <result property="bank"    column="bank"    />
+        <result property="account"    column="account"    />
+    </resultMap>
+
+    <sql id="selectWhSalaryDistributionVo">
+        select id, staff_id, staff_no, working_hours, salary, month, distribute_time, status, create_by, create_time, update_by, update_time from wh_salary_distribution
+    </sql>
+
+    <select id="selectWhSalaryDistributionList" parameterType="WhSalaryDistribution" resultMap="WhSalaryDistributionResult">
+        WITH RECURSIVE cte AS (
+            SELECT *, id as node, staff_name as pathName, CONVERT(id, CHAR(500)) as idPath
+            FROM wh_staff WHERE del_flag = 0
+
+            UNION
+
+            SELECT t.*, cte.node, concat(t.staff_name, '/', cte.pathName), CONCAT(t.id,',',cte.idPath)
+            FROM wh_staff t
+            INNER JOIN cte ON t.id = cte.parent_id
+        )
+        select T1.*,T2.staff_name,T2.staff_no, T3.bank, T3.account, SUBSTRING_INDEX(cte.pathName,'/',3) as pathName
+        from wh_salary_distribution T1
+        left join wh_staff T2 on T1.staff_id = T2.id
+        left join sys_user T3 on T2.staff_no = T3.user_name and T3.del_flag = '0'
+        left join cte on T1.staff_id = cte.node and cte.parent_id = 0
+        <where>  
+            <if test="staffId != null "> and staff_id = #{staffId}</if>
+            <if test="staffName != null  and staffName != ''">
+                T2.staff_name like concat('%', #{staffName}, '%')
+            </if>
+            <if test="month != null  and month != ''"> and T1.month = #{month}</if>
+            <if test="status != null "> and T1.status = #{status}</if>
+            <if test="developName != null  and developName != ''">
+                and T1.id in (select DISTINCT TT1.salary_id from wh_task_distribution TT1
+                                left join wh_task TT2 on TT1.task_id = TT2.id
+                                left join wh_staff TT3 on TT2.staff_id = TT3.id
+                              where TT3.staff_name like concat('%', #{developName}, '%'))
+            </if>
+            <if test="pathId != null ">
+                and find_in_set(#{pathId}, cte.idPath) > 0
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectWhSalaryDistributionById" parameterType="Long" resultMap="WhSalaryDistributionResult">
+        <include refid="selectWhSalaryDistributionVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhSalaryDistribution" parameterType="WhSalaryDistribution" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_salary_distribution
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="staffId != null">staff_id,</if>
+            <if test="staffNo != null">staff_no,</if>
+            <if test="workingHours != null">working_hours,</if>
+            <if test="salary != null">salary,</if>
+            <if test="month != null">month,</if>
+            <if test="distributeTime != null">distribute_time,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="staffId != null">#{staffId},</if>
+            <if test="staffNo != null">#{staffNo},</if>
+            <if test="workingHours != null">#{workingHours},</if>
+            <if test="salary != null">#{salary},</if>
+            <if test="month != null">#{month},</if>
+            <if test="distributeTime != null">#{distributeTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhSalaryDistribution" parameterType="WhSalaryDistribution">
+        update wh_salary_distribution
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="staffId != null">staff_id = #{staffId},</if>
+            <if test="staffNo != null">staff_no = #{staffNo},</if>
+            <if test="workingHours != null">working_hours = #{workingHours},</if>
+            <if test="salary != null">salary = #{salary},</if>
+            <if test="month != null">month = #{month},</if>
+            <if test="distributeTime != null">distribute_time = #{distributeTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhSalaryDistributionById" parameterType="Long">
+        delete from wh_salary_distribution where id = #{id}
+    </delete>
+
+    <delete id="deleteWhSalaryDistributionByIds" parameterType="String">
+        delete from wh_salary_distribution where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectSalaryByStaffNo" resultMap="WhSalaryDistributionResult">
+        <include refid="selectWhSalaryDistributionVo"/>
+        where staff_no = #{staffNo} and month = #{month} and status=0
+    </select>
+
+    <update id="batchUpdateStatus" parameterType="String">
+        update wh_salary_distribution
+        set status = 1, distribute_time = sysdate()
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countByStaffId" parameterType="Long" resultType="Integer">
+        select count(1)
+        from wh_salary_distribution
+        where status = 0
+          and staff_id = #{staffId}
+    </select>
+</mapper>

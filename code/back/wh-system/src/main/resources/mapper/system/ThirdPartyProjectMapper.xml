@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.system.mapper.ThirdPartyProjectMapper">
+
+	<resultMap type="ThirdPartyProjectVo" id="ThirdPartyProjectResult">
+		<result property="id"     column="id"      />
+		<result property="statDate"     column="stat_date"      />
+		<result property="itzcbh"     column="itzcbh"      />
+		<result property="itzcmc"     column="itzcmc"      />
+		<result property="zybh"     column="zybh"      />
+		<result property="dmyyjxzybh"     column="dmyyjxzybh"      />
+		<result property="zyxxmxqc"     column="zyxxmxqc"      />
+		<result property="isDelete"     column="is_delete"      />
+		<result property="dataType"     column="data_type"      />
+		<result property="etlTime"     column="etl_time"      />
+	</resultMap>
+
+	<sql id="selectProjectVo">
+		select id, stat_date, itzcbh, itzcmc, zybh, dmyyjxzybh, zyxxmxqc, is_delete, data_type, etl_time from ads_gssb_asset_code_mirroring_info_d
+	</sql>
+
+	<select id="selectLogStatus" resultType="Integer">
+	    select count(1)
+		from ads_task_complete_status_log
+		where exec_date = #{execDate}
+			and table_name = 'ads.ads_gssb_asset_code_mirroring_info_d'
+			and task_status = 1
+	</select>
+
+	<select id="selectProjectList" resultMap="ThirdPartyProjectResult">
+		<include refid="selectProjectVo"/>
+		where stat_date = #{statDate}
+			and dmyyjxzybh is not null
+	</select>
+
+</mapper> 

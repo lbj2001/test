@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhVideoRecordMapper">
+    
+    <resultMap type="WhVideoRecord" id="WhVideoRecordResult">
+        <result property="id"    column="id"    />
+        <result property="sessionId"    column="session_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="duration"    column="duration"    />
+        <result property="totalRecordings"    column="total_recordings"    />
+        <result property="videoUrl"    column="video_url"    />
+        <result property="claimStatus"    column="claim_status"    />
+        <result property="timeLimit"    column="time_limit"    />
+        <result property="syncTime"    column="sync_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectWhVideoRecordVo">
+        select id, session_id, user_name, start_time, end_time, duration, total_recordings, video_url, claim_status, time_limit, sync_time, create_by, create_time, update_by, update_time, del_flag from wh_video_record
+    </sql>
+
+    <select id="selectWhVideoRecordList" parameterType="WhVideoRecord" resultMap="WhVideoRecordResult">
+        <include refid="selectWhVideoRecordVo"/>
+        <where>
+            del_flag = 0
+            <if test="sessionId != null "> and session_id = #{sessionId}</if>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="duration != null "> and duration = #{duration}</if>
+            <if test="totalRecordings != null "> and total_recordings = #{totalRecordings}</if>
+            <if test="videoUrl != null  and videoUrl != ''"> and video_url = #{videoUrl}</if>
+            <if test="claimStatus != null "> and claim_status = #{claimStatus}</if>
+            <if test="timeLimit != null "> and time_limit = #{timeLimit}</if>
+        </where>
+    </select>
+    
+    <select id="selectWhVideoRecordById" parameterType="Long" resultMap="WhVideoRecordResult">
+        <include refid="selectWhVideoRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectWhVideoRecordBySessionIds" resultMap="WhVideoRecordResult">
+        <include refid="selectWhVideoRecordVo"/>
+        <where>
+            del_flag = '0'
+            <if test="sessionIds != null and sessionIds.size>0">
+                and session_id in
+                <foreach collection="sessionIds" item="sessionId" separator="," open="(" close=")">
+                    #{sessionId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+        
+    <insert id="insertWhVideoRecord" parameterType="WhVideoRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_video_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sessionId != null">session_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="duration != null">duration,</if>
+            <if test="totalRecordings != null">total_recordings,</if>
+            <if test="videoUrl != null">video_url,</if>
+            <if test="claimStatus != null">claim_status,</if>
+            <if test="timeLimit != null">time_limit,</if>
+            <if test="syncTime != null">sync_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sessionId != null">#{sessionId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="totalRecordings != null">#{totalRecordings},</if>
+            <if test="videoUrl != null">#{videoUrl},</if>
+            <if test="claimStatus != null">#{claimStatus},</if>
+            <if test="timeLimit != null">#{timeLimit},</if>
+            <if test="syncTime != null">#{syncTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhVideoRecord" parameterType="WhVideoRecord">
+        update wh_video_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sessionId != null">session_id = #{sessionId},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="duration != null">duration = #{duration},</if>
+            <if test="totalRecordings != null">total_recordings = #{totalRecordings},</if>
+            <if test="videoUrl != null">video_url = #{videoUrl},</if>
+            <if test="claimStatus != null">claim_status = #{claimStatus},</if>
+            <if test="timeLimit != null">time_limit = #{timeLimit},</if>
+            <if test="syncTime != null">sync_time = #{syncTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhVideoRecordById" parameterType="Long">
+        delete from wh_video_record where id = #{id}
+    </delete>
+
+    <delete id="deleteWhVideoRecordByIds" parameterType="String">
+        delete from wh_video_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectLastestSync" resultMap="WhVideoRecordResult">
+        select * from wh_video_record
+        order by sync_time desc limit 1
+    </select>
+</mapper>

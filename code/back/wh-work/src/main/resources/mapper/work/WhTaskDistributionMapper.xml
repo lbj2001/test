@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhTaskDistributionMapper">
+    
+    <resultMap type="WhTaskDistribution" id="WhTaskDistributionResult">
+        <result property="id"    column="id"    />
+        <result property="taskId"    column="task_id"    />
+        <result property="salaryId"    column="salary_id"    />
+        <result property="staffId"    column="staff_id"    />
+        <result property="taskNo"    column="task_no"    />
+        <result property="taskName"    column="task_name"    />
+        <result property="staffName"    column="staff_name"    />
+        <result property="workingHours"    column="working_hours"    />
+        <result property="workingPrice"    column="working_price"    />
+        <result property="distributeTime"    column="distribute_time"    />
+        <result property="distributeRatio"    column="distribute_ratio"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="appName"    column="app_name"    />
+        <result property="developName"    column="developName"    />
+        <result property="linkUrl"    column="link_url"    />
+    </resultMap>
+
+    <sql id="selectWhTaskDistributionVo">
+        select id, task_id, salary_id, staff_id, task_no, task_name, staff_name, working_hours, working_price, distribute_time, distribute_ratio, create_by, create_time, update_by, update_time from wh_task_distribution
+    </sql>
+
+    <select id="selectWhTaskDistributionList" parameterType="WhTaskDistribution" resultMap="WhTaskDistributionResult">
+        <include refid="selectWhTaskDistributionVo"/>
+        <where>  
+            <if test="taskNo != null  and taskNo != ''"> and task_no like concat('%', #{taskNo}, '%')</if>
+            <if test="taskName != null  and taskName != ''"> and task_name like concat('%', #{taskName}, '%')</if>
+            <if test="staffName != null  and staffName != ''"> and staff_name like concat('%', #{staffName}, '%')</if>
+            <if test="workingHours != null "> and working_hours = #{workingHours}</if>
+            <if test="taskId != null "> and task_id = #{taskId}</if>
+        </where>
+    </select>
+    
+    <select id="selectListBySalaryIds" resultMap="WhTaskDistributionResult">
+        select T1.*, T2.app_name, T2.link_url, T3.staff_name as developName
+        from wh_task_distribution T1
+        left join wh_task T2 on T1.task_id = T2.id
+        left join wh_staff T3 on T2.staff_id = T3.id
+        <where>
+            <if test="salaryIds != null and salaryIds.size > 0">
+                and T1.salary_id in
+                <foreach item="salaryId" collection="salaryIds" open="(" separator="," close=")">
+                    #{salaryId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectWhTaskDistributionById" parameterType="Long" resultMap="WhTaskDistributionResult">
+        <include refid="selectWhTaskDistributionVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhTaskDistribution" parameterType="WhTaskDistribution">
+        insert into wh_task_distribution
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskId != null">task_id,</if>
+            <if test="salaryId != null">salary_id,</if>
+            <if test="staffId != null">staff_id,</if>
+            <if test="taskNo != null and taskNo != ''">task_no,</if>
+            <if test="taskName != null and taskName != ''">task_name,</if>
+            <if test="staffName != null and staffName != ''">staff_name,</if>
+            <if test="workingHours != null">working_hours,</if>
+            <if test="workingPrice != null">working_price,</if>
+            <if test="distributeTime != null">distribute_time,</if>
+            <if test="distributeRatio != null">distribute_ratio,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskId != null">#{taskId},</if>
+            <if test="salaryId != null">#{salaryId},</if>
+            <if test="staffId != null">#{staffId},</if>
+            <if test="taskNo != null and taskNo != ''">#{taskNo},</if>
+            <if test="taskName != null and taskName != ''">#{taskName},</if>
+            <if test="staffName != null and staffName != ''">#{staffName},</if>
+            <if test="workingHours != null">#{workingHours},</if>
+            <if test="workingPrice != null">#{workingPrice},</if>
+            <if test="distributeTime != null">#{distributeTime},</if>
+            <if test="distributeRatio != null">#{distributeRatio},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhTaskDistribution" parameterType="WhTaskDistribution">
+        update wh_task_distribution
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="salaryId != null">salary_id = #{salaryId},</if>
+            <if test="staffId != null">staff_id = #{staffId},</if>
+            <if test="taskNo != null and taskNo != ''">task_no = #{taskNo},</if>
+            <if test="taskName != null and taskName != ''">task_name = #{taskName},</if>
+            <if test="staffName != null and staffName != ''">staff_name = #{staffName},</if>
+            <if test="workingHours != null">working_hours = #{workingHours},</if>
+            <if test="workingPrice != null">working_price = #{workingPrice},</if>
+            <if test="distributeTime != null">distribute_time = #{distributeTime},</if>
+            <if test="distributeRatio != null">distribute_ratio = #{distributeRatio},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhTaskDistributionById" parameterType="Long">
+        delete from wh_task_distribution where id = #{id}
+    </delete>
+
+    <delete id="deleteWhTaskDistributionByIds" parameterType="String">
+        delete from wh_task_distribution where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

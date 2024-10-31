@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhProjectMapper">
+    
+    <resultMap type="WhProject" id="WhProjectResult">
+        <result property="id"    column="id"    />
+        <result property="projectNo"    column="project_no"    />
+        <result property="mainProjectName"    column="main_project_name"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectType"    column="project_type"    />
+        <result property="projectSource"    column="project_source"    />
+        <result property="projectLeader"    column="project_leader"    />
+        <result property="summaryNo"    column="summary_no"    />
+        <result property="codeSourceNo"    column="code_source_no"    />
+        <result property="cycleType"    column="cycle_type"    />
+        <result property="branchType"    column="branch_type"    />
+        <result property="workHoursThreshold"    column="work_hours_threshold"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectWhProjectVo">
+        select id, project_no, main_project_name, project_name, project_type, project_source, project_leader, summary_no, code_source_no, cycle_type, branch_type, work_hours_threshold, status, create_by, create_time, update_by, update_time, del_flag from wh_project
+    </sql>
+
+    <select id="selectWhProjectList" parameterType="WhProject" resultMap="WhProjectResult">
+        select T1.*, T2.nick_name as createByName
+        from wh_project T1
+        left join sys_user T2 on T1.create_by = T2.user_name and T2.del_flag = '0'
+        <where>
+            T1.del_flag = 0
+            <if test="projectNo != null  and projectNo != ''"> and T1.project_no like concat('%', #{projectNo}, '%')</if>
+            <if test="mainProjectName != null  and mainProjectName != ''"> and T1.main_project_name like concat('%', #{mainProjectName}, '%')</if>
+            <if test="projectName != null  and projectName != ''"> and T1.project_name like concat('%', #{projectName}, '%')</if>
+            <if test="projectType != null "> and T1.project_type = #{projectType}</if>
+            <if test="summaryNo != null "> and T1.summary_no = #{summaryNo}</if>
+            <if test="projectSource != null "> and T1.project_source = #{projectSource}</if>
+            <if test="projectLeader != null  and projectLeader != ''"> and T1.project_leader like concat('%', #{projectLeader}, '%')</if>
+            <if test="cycleType != null "> and T1.cycle_type = #{cycleType}</if>
+            <if test="status != null "> and T1.status = #{status}</if>
+            <if test="projectTypeFlag != null and projectTypeFlag == 1">
+                and T1.project_type is not null
+                and ((T1.project_type &lt;&gt; 1) or ( T1.project_type = 1 and T1.code_source_no is not null))
+            </if>
+        </where>
+    </select>
+
+    <select id="selectStaffProjectList" parameterType="WhProject" resultMap="WhProjectResult">
+        select DISTINCT T1.*, T2.submit_time
+        from wh_project T1
+        left join (select project_id, staff_id, max(submit_time) as submit_time from wh_task group by  project_id, staff_id) T2 on T1.id = T2.project_id and T2.staff_id = #{staffId}
+        where T1.del_flag = 0
+        <if test="status != null ">
+          and T1.status = #{status}
+        </if>
+        <if test="projectLeader != null  and projectLeader != ''">
+          and T1.project_leader like concat('%', #{projectLeader}, '%')
+        </if>
+        <if test="projectTypeFlag != null and projectTypeFlag == 1">
+            and T1.project_type is not null
+            and ((T1.project_type &lt;&gt; 1) or ( T1.project_type = 1 and T1.code_source_no is not null))
+        </if>
+        ORDER BY T2.submit_time desc
+    </select>
+    
+    <select id="selectWhProjectById" parameterType="Long" resultMap="WhProjectResult">
+        <include refid="selectWhProjectVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhProject" parameterType="WhProject" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_project
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectNo != null and projectNo != ''">project_no,</if>
+            <if test="mainProjectName != null">main_project_name,</if>
+            <if test="projectName != null">project_name,</if>
+            <if test="projectType != null">project_type,</if>
+            <if test="projectSource != null">project_source,</if>
+            <if test="projectLeader != null">project_leader,</if>
+            <if test="summaryNo != null">summary_no,</if>
+            <if test="codeSourceNo != null">code_source_no,</if>
+            <if test="cycleType != null">cycle_type,</if>
+            <if test="branchType != null">branch_type,</if>
+            <if test="workHoursThreshold != null">work_hours_threshold,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectNo != null and projectNo != ''">#{projectNo},</if>
+            <if test="mainProjectName != null">#{mainProjectName},</if>
+            <if test="projectName != null">#{projectName},</if>
+            <if test="projectType != null">#{projectType},</if>
+            <if test="projectSource != null">#{projectSource},</if>
+            <if test="projectLeader != null">#{projectLeader},</if>
+            <if test="summaryNo != null">#{summaryNo},</if>
+            <if test="codeSourceNo != null">#{codeSourceNo},</if>
+            <if test="cycleType != null">#{cycleType},</if>
+            <if test="branchType != null">#{branchType},</if>
+            <if test="workHoursThreshold != null"> #{workHoursThreshold},</if>
+            <if test="status != null"> #{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhProject" parameterType="WhProject">
+        update wh_project
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectNo != null and projectNo != ''">project_no = #{projectNo},</if>
+            <if test="mainProjectName != null">main_project_name = #{mainProjectName},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="projectType != null">project_type = #{projectType},</if>
+            <if test="projectSource != null">project_source = #{projectSource},</if>
+            <if test="projectLeader != null">project_leader = #{projectLeader},</if>
+            <if test="summaryNo != null">summary_no = #{summaryNo},</if>
+            <if test="codeSourceNo != null">code_source_no = #{codeSourceNo},</if>
+            <if test="cycleType != null">cycle_type = #{cycleType},</if>
+            <if test="branchType != null">branch_type = #{branchType},</if>
+            <if test="workHoursThreshold != null">work_hours_threshold = #{workHoursThreshold},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhProjectById" parameterType="Long">
+        delete from wh_project where id = #{id}
+    </delete>
+
+    <delete id="deleteWhProjectByIds" parameterType="String">
+        delete from wh_project where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectMaxProjectNo" parameterType="String" resultType="String">
+        select project_no from wh_project where project_source = 2 order by create_time desc limit 1
+    </select>
+
+    <select id="selectExistProjectName" parameterType="String" resultType="Integer">
+        select count(1) from wh_project where project_name = #{projectName} and del_flag = '0'
+    </select>
+
+    <update id="updateProjectByNo" parameterType="WhProject">
+        update wh_project set project_name =#{projectName} where project_no = #{projectNo}
+    </update>
+
+    <update id="deleteProjectByNo" parameterType="WhProject">
+        update wh_project set del_flag = 1
+        where del_flag = 0 and project_no = #{projectNo} and summary_no = #{summaryNo}
+    </update>
+
+</mapper>

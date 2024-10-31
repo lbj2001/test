@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.work.mapper.WhClaimDetailItemMapper">
+    
+    <resultMap type="WhClaimDetailItem" id="WhClaimDetailItemResult">
+        <result property="id"    column="id"    />
+        <result property="claimId"    column="claim_id"    />
+        <result property="videoUrl"    column="video_url"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="duration"    column="duration"    />
+        <result property="lockTime"    column="lock_time"    />
+        <result property="lockStatus"    column="lock_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectWhClaimDetailItemVo">
+        select id, claim_id, video_url, start_time, end_time, duration, lock_time, lock_status, create_by, create_time, update_by, update_time, del_flag from wh_claim_detail_item
+    </sql>
+
+    <select id="selectWhClaimDetailItemList" parameterType="WhClaimDetailItem" resultMap="WhClaimDetailItemResult">
+        <include refid="selectWhClaimDetailItemVo"/>
+        <where>  
+            <if test="claimId != null "> and claim_id = #{claimId}</if>
+            <if test="videoUrl != null  and videoUrl != ''"> and video_url = #{videoUrl}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="duration != null "> and duration = #{duration}</if>
+            <if test="claimIds != null and claimIds.size>0">
+                and claim_id in
+                <foreach collection="claimIds" item="claimId" separator="," open="(" close=")">
+                    #{claimId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectWhClaimDetailItemById" parameterType="Long" resultMap="WhClaimDetailItemResult">
+        <include refid="selectWhClaimDetailItemVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhClaimDetailItem" parameterType="WhClaimDetailItem" useGeneratedKeys="true" keyProperty="id">
+        insert into wh_claim_detail_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="claimId != null">claim_id,</if>
+            <if test="videoUrl != null">video_url,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="duration != null">duration,</if>
+            <if test="lockTime != null">lock_time,</if>
+            <if test="lockStatus != null">lock_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="claimId != null">#{claimId},</if>
+            <if test="videoUrl != null">#{videoUrl},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="lockTime != null">#{lockTime},</if>
+            <if test="lockStatus != null">#{lockStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhClaimDetailItem" parameterType="WhClaimDetailItem">
+        update wh_claim_detail_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="claimId != null">claim_id = #{claimId},</if>
+            <if test="videoUrl != null">video_url = #{videoUrl},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="duration != null">duration = #{duration},</if>
+            <if test="lockTime != null">lock_time = #{lockTime},</if>
+            <if test="lockStatus != null">lock_status = #{lockStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhClaimDetailItemById" parameterType="Long">
+        delete from wh_claim_detail_item where id = #{id}
+    </delete>
+
+    <delete id="deleteWhClaimDetailItemByIds" parameterType="String">
+        delete from wh_claim_detail_item where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
